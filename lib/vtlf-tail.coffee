@@ -6,7 +6,7 @@ fs = require 'fs-plus'
 module.exports =
 class Tail
   
-  constructor: (@filePath, @fileView, reader, @lineMgr) ->
+  constructor: (state, vtlfLibPath, @pluginMgr, @filePath, @fileView, reader, @lineMgr) ->
     console.log 'new Tail', @filePath
     @watcher = => 
       reader.buildIndex null, => @lineMgr.updateLinesInDOM()
@@ -17,18 +17,19 @@ class Tail
       if @fileView.find('.sticky-bar').length is 0
         width = @fileView.width()
         @fileView.append '<div class="sticky-bar highlight text-info" ' +
-                         'style="width:'  + width + 'px; opacity: 0.3; color:#666; ' +
-                                 'height:' + @chrH + 'px; background-color:#aaa; ' +
+                         'style="width:'  + width + 'px; color:#666; ' +
+                                 'height:' + @chrH + 'px; background-color:rgb(175,175,175,0.3); ' +
                                  'text-align:center">-- Tailing --</div>'
       @lineMgr.setScrollPos @lineCount
     else
       @fileView.find('.sticky-bar').remove()
   
-  newLines: (@fileView, lineNumCharCount, @lineCount, maxLineLen) -> @checkSticky()
-  scroll:          (@fileView, topLineNum, linesVis, @botLineNum) -> @checkSticky()
+  newLines: (@fileView, lineNumCharCount, @lineCount, @maxLineLen, @botLineNum) -> @checkSticky()
+  scroll: (@fileView, topLineNum, linesVis, @botLineNum) -> @checkSticky()
+  postFileOpen: -> @lineMgr.setScrollPos @lineCount
   
   destroy: -> 
     @fileView.find('.sticky-bar').remove()
     fs.unwatchFile @filePath, @watcher
-  
+    
     
