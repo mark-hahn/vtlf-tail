@@ -28,10 +28,9 @@ class Tail
     if @isDestroyed then return
     
     if not @atBottom and @fileView.botLineNum is @fileView.lineCount-1 
-      console.log 'sticky-bar add', {botLineNum: @fileView.botLineNum, lineCount: @fileView.lineCount}
       if atom.workspaceView.find('.item-views .sticky-bar').length is 0
-        @fileView.find '.vtlf-inner'
-            .after "<div class='sticky-bar highlight text-info'
+        @fileView.find '.vtlf-horiz'
+          	     .after "<div class='sticky-bar highlight text-info'
                          style='height:#{@fileView.chrH}px; color:#666;
                                 -webkit-order:3;
                                 background-color:rgb(175,175,175,0.3);
@@ -45,14 +44,12 @@ class Tail
       return
   	     
     if @atBottom and @fileView.botLineNum < @fileView.lineCount-1
-      console.log 'sticky-bar remove', {botLineNum: @fileView.botLineNum, lineCount: @fileView.lineCount}
       atom.workspaceView.find('.item-views .sticky-bar').remove()
       @atBottom = no
       @fileView.setScrollRelative -1
     
   destroy: -> 
     @isDestroyed = yes
-    console.log 'tail destroyed'
     atom.workspaceView.find('.item-views .sticky-bar').remove()
     fs.unwatchFile @fileView.filePath, @watcher
     
