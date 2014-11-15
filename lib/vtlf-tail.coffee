@@ -1,7 +1,8 @@
 
 # vtlf-tail
 
-fs = require 'fs-plus'
+fs  = require 'fs-plus'
+{$} = require 'atom'
 
 module.exports =
 class Tail
@@ -31,7 +32,16 @@ class Tail
     $lineNums = @fileView.find '.line-num'
     $lineNums.removeClass 'tail-hilite'
     # console.log 'didScroll', @tailing, $lineNums.length, @fileView.botLineNum, @fileView.lineCount
-    if @tailing then $lineNums.last().addClass 'tail-hilite'
+    if @tailing 
+      botLineNum = @fileView.botLineNum
+      $lineNum = $lineNums.last()
+      lineNum  = +$lineNum.parent().attr 'data-line'
+      if +$lineNum.attr('data-line') isnt botLineNum
+        $lineNums.each ->
+          $lineNum = $ @
+          lineNum  = +$lineNum.parent().attr 'data-line'
+          if lineNum is botLineNum then return false
+      $lineNum.addClass 'tail-hilite'
     
   destroy: -> 
     @isDestroyed = yes
