@@ -7,14 +7,19 @@ fs  = require 'fs-plus'
 module.exports =
 class Tail
   
-  constructor: (@fileView) ->
+  constructor: (@fileView, @state, vtlfLibPath) ->
+    @Viewer = require vtlfLibPath + 'viewer'
+    @filePath = @fileView.filePath
     
-    @watcher = => 
+    @watcher = (event, filename) => 
       if @isDestroyed then return
       if not @fileIsOpen then setTimeout @watcher, 100; return
-      @fileView.reader.buildIndex null, => @fileView.haveNewLines()
+      @fileView.reader.buildIndex null, (res) => 
+        switch res
+          when 'ok' then @fileView.haveNewLines()
+          when 'reload' then atom.workspace.activePane.activateItem new @Viewer @filePath
       
-    fs.watch @fileView.filePath, persistent: no, @watcher
+    fs.watch @filePath, persistent: no, @watcher
 
     @fileView.onDidOpenFile    => @didOpenFile()
     @fileView.onDidGetNewLines => @didGetNewLines()
